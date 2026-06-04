@@ -33,10 +33,10 @@ type MeshModelRegistrant struct {
 }
 
 // NewMeshModelRegistrant returns an instance of NewMeshModelRegistrant
-func NewMeshModelRegistrant(paths []MeshModelRegistrantDefinitionPath, HTTPRegistry string) *MeshModelRegistrant {
+func NewMeshModelRegistrant(paths []MeshModelRegistrantDefinitionPath, httpRegistry string) *MeshModelRegistrant {
 	return &MeshModelRegistrant{
 		Paths:        paths,
-		HTTPRegistry: HTTPRegistry,
+		HTTPRegistry: httpRegistry,
 	}
 }
 
@@ -48,7 +48,7 @@ func NewMeshModelRegistrant(paths []MeshModelRegistrantDefinitionPath, HTTPRegis
 // after that.
 //
 // Register function is a blocking function
-func (or *MeshModelRegistrant) Register(ctxID string) error {
+func (or *MeshModelRegistrant) Register(ctxID string) error { //nolint:cyclop
 	for _, dpath := range or.Paths {
 		var mrd registry.MeshModelRegistrantData
 		definition, err := os.Open(dpath.EntityDefintionPath)
@@ -61,8 +61,7 @@ func (or *MeshModelRegistrant) Register(ctxID string) error {
 			Metadata: ctxID,
 		}
 		mrd.EntityType = dpath.Type
-		switch dpath.Type {
-		case types.ComponentDefinition:
+		if dpath.Type == types.ComponentDefinition {
 			var cd v1alpha1.ComponentDefinition
 			if err := json.NewDecoder(definition).Decode(&cd); err != nil {
 				_ = definition.Close()
