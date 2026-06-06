@@ -231,7 +231,7 @@ func (test *SMITest) connectConformanceTool(name, ns string, kclient *mesherykub
 }
 
 // runConformanceTest runs the conformance test
-func (test *SMITest) runConformanceTest(response *Response) error {
+func (test *SMITest) runConformanceTest(response *Response) error { //nolint:cyclop
 	cClient, err := conformance.CreateClient(context.TODO(), test.smiAddress)
 	if err != nil {
 		return err

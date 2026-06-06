@@ -41,7 +41,7 @@ type StaticCompConfig struct {
 }
 
 // CreateComponents generates components for a given configuration and stores them.
-func CreateComponents(scfg StaticCompConfig) error {
+func CreateComponents(scfg StaticCompConfig) error { //nolint:cyclop
 	meshmodeldirName, _ := getLatestDirectory(scfg.MeshModelPath)
 	meshmodelDir := filepath.Join(scfg.MeshModelPath, scfg.DirName)
 	_, err := os.Stat(meshmodelDir)
@@ -93,7 +93,7 @@ func convertOAMtoMeshmodel(def []byte, schema string, isCore bool, meshmodelname
 	}
 	var c meshmodel.ComponentDefinition
 	c.Metadata = make(map[string]interface{})
-	metaname := strings.Split(manifests.FormatToReadableString(oamdef.ObjectMeta.Name), ".")
+	metaname := strings.Split(manifests.FormatToReadableString(oamdef.Name), ".")
 	var displayname string
 	if len(metaname) > 0 {
 		displayname = metaname[0]
@@ -108,7 +108,7 @@ func convertOAMtoMeshmodel(def []byte, schema string, isCore bool, meshmodelname
 	c.Metadata = mcfg.Metadata
 	if isCore {
 		c.APIVersion = oamdef.APIVersion
-		c.Kind = oamdef.ObjectMeta.Name
+		c.Kind = oamdef.Name
 		c.Model.Version = oamdef.Spec.Metadata["version"]
 		c.Model.Name = meshmodelname
 	} else {
@@ -144,7 +144,7 @@ func createMeshModelComponentsFromLegacyOAMComponents(def []byte, schema string,
 // Every time that managed components are generated for a new infrastructure version (e.g.  service mesh version),
 // the latest core components are to be replicated (copied) and assigned the latest infrastructure version.
 // The schema of the replicated core components can be augmented or left as-is depending upon the need to do so.
-func copyCoreComponentsToNewVersion(fromDir string, toDir string, newVersion string, isMeshmodel bool) error {
+func copyCoreComponentsToNewVersion(fromDir string, toDir string, newVersion string, isMeshmodel bool) error { //nolint:cyclop
 	files, err := os.ReadDir(fromDir)
 	if err != nil {
 		return err
@@ -156,9 +156,12 @@ func copyCoreComponentsToNewVersion(fromDir string, toDir string, newVersion str
 			if err != nil {
 				return err
 			}
-			defer fsource.Close()
 			content, err := io.ReadAll(fsource)
 			if err != nil {
+				_ = fsource.Close()
+				return err
+			}
+			if err := fsource.Close(); err != nil {
 				return err
 			}
 			// only for definition files
